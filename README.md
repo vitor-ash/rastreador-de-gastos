@@ -21,7 +21,7 @@ rastreador-de-gastos <br />
 - ```LICENSE```: MIT license.
 - ```assets```: pasta onde arquivos PNGs estão armazenados.
 - ```main.py```: programa do rastreador de gastos.
-- ```expenses.txt```: arquivo csv onde ficam as categorias usadas no rastreador.
+- ```expenses.csv```: arquivo csv onde ficam as categorias usadas no rastreador.
 
 ---
 
