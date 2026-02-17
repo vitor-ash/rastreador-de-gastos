@@ -38,7 +38,7 @@ O primeiro comando que você pode utilizar é o `--help`:
 
 ---
 
-A partir daí, você pode escolher as opções indicas. Aqui vão algumas imagens ilustrativas:
+A partir daí, você pode escolher as opções indicadas. Aqui vão algumas imagens ilustrativas:
 
 ![imagem1](assets/image1.png)
 
