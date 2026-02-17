@@ -9,6 +9,7 @@ current_id: int = 0
 lista_backup = []
 fieldnames = ["id", "data", "descricao", "valor", "categoria"]
 categorias = ("Alimentação", "Transporte", "Moradia", "Saúde", "Outros")
+#esse categorias_test só é usado uma vez
 categorias_test = ("ALIMENTACAO", "TRANSPORTE", "MORADIA", "SAUDE", "OUTROS")
 
 try:
@@ -18,16 +19,9 @@ try:
             lista_backup.append(line)
             if int(line['id']) > current_id: current_id = int(line['id'])
 except FileNotFoundError:
-    with open("despesas.csv", "w", newline="") as create_new_file:
+    with open("despesas.csv", "w", newline="", encoding="utf-8") as create_new_file:
         writer = csv.writer(create_new_file)
         writer.writerow(fieldnames)
-
-tabela_despesas = Table(title="Lista de Despesas")
-tabela_despesas.add_column("ID", justify="center", style="bright_black")
-tabela_despesas.add_column("Data", justify="center", style="yellow", no_wrap=True)
-tabela_despesas.add_column("Descrição", justify="center", style="magenta")
-tabela_despesas.add_column("Valor (R$)", justify="center", style="green")
-tabela_despesas.add_column("Categoria", justify="center", style="blue")
 
 @click.group()
 def options():
@@ -35,10 +29,9 @@ def options():
 
 @options.command()
 def add():
-    """Adicionar uma nova despesa"""
+    """Adicionar uma nova despesa""" # info que aparece no --help
 
-
-
+    # pega a data e verifica se está correta
     data: str = input("Digite a data (DD/MM/YYYY): ")
     try:
         testa_data = datetime.strptime(data, "%d/%m/%Y")
@@ -46,13 +39,16 @@ def add():
         click.echo("Formato inválido! Use o formato DD/MM/YYYY.")
         return
 
+    # pega a descrição do produto
     descricao: str = input("Digite a descrição: ")
 
+    # pega o valor do produto
     valor: float = float(input("Digite o valor: "))
     if valor < 0:
         click.echo("Valor inválido! Digite um número positivo.")
         return
 
+    # escolhe a categoria
     click.echo("Escolha a categoria: ")
 
     tabela_add = Table(title="Escolha a categoria: ", title_justify="left")
@@ -66,10 +62,22 @@ def add():
     if escolha not in [1, 2, 3, 4, 5]:
         click.echo("Escolha inválida!")
         return 
-
-    with open("despesas.csv", "a", newline="", encoding="utf-8") as adicionar:
-        write = csv.writer(adicionar)
-        write.writerow([current_id + 1, data, descricao, valor, categorias[escolha]])
+    
+    global lista_backup
+    lista_backup.append({
+        'id': current_id + 1, 
+        'data': data, 
+        'descricao': descricao, 
+        'valor': valor, 
+        'categoria': categorias[escolha-1]
+        })
+    
+    current_id += 1
+    
+    with open("despesas.csv", "w", newline="", encoding="utf-8") as adicionar:
+        arquivo = csv.DictWriter(adicionar, fieldnames=fieldnames)
+        arquivo.writeheader()
+        arquivo.writerows(lista_backup)
     
     click.echo(f"Despesa com ID {current_id + 1} adicionada com sucesso!")
 
@@ -87,6 +95,7 @@ def edit(id_escolhido: int):
 
     for item in lista_backup:
         if int(item['id']) == id_escolhido:
+            #tenta mudar a data
             nova_data: str = input(f"Data atual: {item['data']}. Digite a nova data (DD/MM/YYYY) ou pressione Enter para manter: ") or item['data']
             if nova_data.strip() != "":
                 try:
@@ -95,8 +104,10 @@ def edit(id_escolhido: int):
                     click.echo("Formato inválido! Use o formato DD/MM/YYYY.")
                     return
             
+            #tenta mudar a descrição
             nova_descricao: str = input(f"Descrição atual: {item['descricao']}. Digite a nova descrição ou pressione Enter para manter: ") or item['descricao']
 
+            #tenta mudar o valor
             novo_valor: str = str(input(f"Valor atual: {float(item['valor']):.2f}. Digite o novo valor ou pressione Enter para manter: ")) or item['valor']
         
             try:
@@ -146,16 +157,24 @@ def delete(id_escolhido: int):
     if id_escolhido > current_id or id_escolhido < 1:
         click.echo("Nenhuma despesa encontrada com o ID fornecido.")
         return
+    
+    global lista_backup
+
+    lista_tpm = []
+    for item in lista_backup:
+        if id_escolhido == int(item['id']):
+            pass
+        else:
+            lista_tpm.append(item)
+
+    
+    lista_backup = lista_tpm
 
     with open("despesas.csv", "w", newline="", encoding="utf-8") as delete_file:
         arquivo_remove = csv.DictWriter(delete_file, fieldnames=fieldnames)
-
         arquivo_remove.writeheader()
-        for item in lista_backup:
-            if id_escolhido == int(item['id']):
-                pass
-            else:
-                arquivo_remove.writerow(item)
+        arquivo_remove.writerows(lista_backup)
+        
 
     click.echo(f"Despesa com ID {id_escolhido} removida com sucesso!")
             
@@ -164,6 +183,7 @@ def delete(id_escolhido: int):
 @click.option("--month-year", type=str, help="Filtra as despesas de um mês/ano específico (formato MM/YYYY).")
 def list(category, month_year):
     """Listar todas as despesas registradas"""
+
     if category != None:
         if category.upper() not in categorias_test:
             click.echo("Categoria não encontrada!")
@@ -176,10 +196,20 @@ def list(category, month_year):
             click.echo("Formato inválido! Use o formato MM/YYYY.")
             return
 
-    global tabela_despesas
+    # criando a tabela
+    tabela_despesas = Table(title="Lista de Despesas")
+    tabela_despesas.add_column("ID", justify="center", style="bright_black")
+    tabela_despesas.add_column("Data", justify="center", style="yellow", no_wrap=True)
+    tabela_despesas.add_column("Descrição", justify="center", style="magenta")
+    tabela_despesas.add_column("Valor (R$)", justify="center", style="green")
+    tabela_despesas.add_column("Categoria", justify="center", style="blue")
+    
     valor_total: float = 0.0
     for compra in lista_backup:
-        if (category == None or category == compra['categoria']) and (month_year == None or month_year == "/".join(compra['data'].split("/")[1:])):
+        # verifica se a categoria e data passam
+        categoria_ok = category == None or category == compra['categoria']
+        data_ok = month_year == None or month_year == "/".join(compra['data'].split("/")[1:])
+        if (categoria_ok and data_ok):
             tabela_despesas.add_row(str(compra['id']), compra['data'], compra['descricao'], str(compra['valor']), compra['categoria'])
             valor_total += float(compra['valor'])
     tabela_despesas.add_section()
