@@ -1,10 +1,13 @@
-id,data,descricao,valor,categoria
-1,20/08/2009,Compra de supermercado,150.75,Alimentação
+ID,Date,Description,Amount,Category
+1,20/08/2009,Compras de supermercado,150.75,Alimentação
 3,20/08/2009,Jantar em restaurante,60.0,Outros
 4,02/08/2042,Melhor coisa do mundo,1000.0,Outros
-5,02/08/2009,Alguma coisa,56.70,Saúde
+5,02/08/2009,Um passado que dói,1.0,4
 6,24/11/2009,Bolo de aniversario,80.00,Transporte
 7,24/11/2009,Uma bomba,56.98,Saúde
 8,21/12/2120,afjlafjaf,76.0,Transporte
 9,12/10/1009,alfjaf,3242.0,Moradia
 10,20/02/2002,Compras no mercadinho,234.56,Outros
+11,24/11/2009,Sempre uma bomba,56.98,Saúde
+12,23/11/2006,i have no idea,45.0,Saúde
+13,12/08/2009,Eu quero muito algo,1000000.0,Saúde
